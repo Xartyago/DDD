@@ -15,5 +15,9 @@ func main() {
 	pr := r.Group("/transactions")
 	pr.POST("/", ts.Store())
 	pr.GET("/", ts.GetAll())
+	pr.PUT("/", ts.Update())
+	pr.PATCH("/code/:id", ts.PatchCode())
+	pr.PATCH("/amount/:id", ts.PatchAmount())
+	pr.DELETE("/", ts.Delete())
 	r.Run(":3001")
 }
