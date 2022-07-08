@@ -1,0 +1,56 @@
+[
+    {
+        "Id": 1,
+        "TransactionCode": "1A",
+        "Currency": "COP",
+        "Emisor": "Santiago",
+        "Receiver": "Xartiago Inc.",
+        "TransactionDate": "06/07/2022",
+        "Amount": 30.50
+    },
+    {
+        "Id": 2,
+        "TransactionCode": "1B",
+        "Currency": "ARS",
+        "Emisor": "Nelson",
+        "Receiver": "Guaritos S.A.S",
+        "TransactionDate": "31/06/2022",
+        "Amount": 310.10
+    },
+    {
+        "Id": 3,
+        "TransactionCode": "1C",
+        "Currency": "EUR",
+        "Emisor": "Juan",
+        "Receiver": "Pepito Stores",
+        "TransactionDate": "20/03/2022",
+        "Amount": 12.89
+    },
+    {
+        "Id": 4,
+        "TransactionCode": "1D",
+        "Currency": "USD",
+        "Emisor": "Julio",
+        "Receiver": "Auri",
+        "TransactionDate": "20/10/2021",
+        "Amount": 1200.72
+    },
+    {
+        "Id": 5,
+        "TransactionCode": "1E",
+        "Currency": "MXN",
+        "Emisor": "Abril",
+        "Receiver": "Rinolt",
+        "TransactionDate": "15/05/2022",
+        "Amount": 300.51
+    },
+    {
+        "Id": 6,
+        "TransactionCode": "1F",
+        "Currency": "USD",
+        "Emisor": "Maya",
+        "Receiver": "Cheap flights",
+        "TransactionDate": "06/07/2022",
+        "Amount": 452.83
+    }  
+]

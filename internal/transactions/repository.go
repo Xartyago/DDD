@@ -1,6 +1,8 @@
 package transactions
 
-import "github.com/Xartyago/DDD/internal/domain"
+import (
+	"github.com/Xartyago/DDD/internal/domain"
+)
 
 type Repository interface {
 	GetAll() ([]domain.Transaction, error)
@@ -16,6 +18,16 @@ func NewRepository() Repository {
 }
 
 func (r *repository) GetAll() ([]domain.Transaction, error) {
+	// trctionsJson, readJsonErr := os.Open("./transactions.json")
+	// fmt.Println(trctionsJson)
+	// if readJsonErr != nil {
+	// 	return nil, readJsonErr
+	// }
+	// var parseTsBytes []domain.Transaction
+	// if err := json.Unmarshal(trctionsJson, &parseTsBytes); err != nil {
+	// 	return nil, err
+	// }
+	// ts = parseTsBytes
 	return ts, nil
 }
 
