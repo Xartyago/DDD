@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"os"
 	"strconv"
 
 	"github.com/Xartyago/DDD/internal/transactions"
@@ -30,7 +31,7 @@ func NewTransaction(s transactions.Service) *Transaction {
 func (s *Transaction) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.Request.Header.Get("token")
-		if token != "123456" {
+		if token != os.Getenv("TOKEN") {
 			ctx.JSON(401, gin.H{
 				"error": "token inválido",
 			})
@@ -61,7 +62,7 @@ func (s *Transaction) Store() gin.HandlerFunc {
 			})
 			return
 		}
-		t, err := s.service.Store(req.Id, req.Currency, req.Emisor, req.Receiver, req.TransactionCode, req.TransactionDate, req.Amount)
+		t, err := s.service.Store(req.TransactionCode, req.Currency, req.Emisor, req.Receiver, req.TransactionDate, req.Amount)
 		if err != nil {
 			ctx.JSON(404, gin.H{"error": err.Error()})
 			return
