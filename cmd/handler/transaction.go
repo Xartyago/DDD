@@ -28,6 +28,15 @@ func NewTransaction(s transactions.Service) *Transaction {
 	}
 }
 
+// ListTransactions godoc
+// @Summary List transactions
+// @Tags Transactions
+// @Description get transactions
+// @Accept  json
+// @Produce  json
+// @Param token header string true "token"
+// @Success 200 {object} web.Response
+// @Router /transactions [get]
 func (s *Transaction) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.Request.Header.Get("token")
@@ -116,6 +125,7 @@ func (s *Transaction) Update() gin.HandlerFunc {
 		ctx.JSON(204, ts)
 	}
 }
+
 func (s *Transaction) PatchCode() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req request
@@ -140,6 +150,7 @@ func (s *Transaction) PatchCode() gin.HandlerFunc {
 		ctx.JSON(204, ts)
 	}
 }
+
 func (s *Transaction) PatchAmount() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req request
@@ -164,6 +175,7 @@ func (s *Transaction) PatchAmount() gin.HandlerFunc {
 		ctx.JSON(204, ts)
 	}
 }
+
 func (s *Transaction) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.Request.Header.Get("token")
