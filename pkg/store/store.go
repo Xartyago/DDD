@@ -8,7 +8,6 @@ import (
 type Store interface {
 	Read(data interface{}) error
 	Write(data interface{}) error
-	Find() error
 }
 
 type fileStore struct {
@@ -21,12 +20,6 @@ func NewStore(fileName string) Store {
 	}
 }
 
-func (fs *fileStore) Find() error {
-	if _, err := os.ReadFile(fs.FilePath); err != nil {
-		return err
-	}
-	return nil
-}
 func (fs *fileStore) Write(data interface{}) error {
 	fileData, err := json.Marshal(data)
 	if err != nil {
