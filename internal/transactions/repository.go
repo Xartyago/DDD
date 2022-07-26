@@ -1,26 +1,27 @@
 package transactions
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/Xartyago/DDD/internal/domain"
 	"github.com/Xartyago/DDD/pkg/store"
+	"github.com/Xartyago/DDD/pkg/web"
 )
 
 type Repository interface {
 	GetAll() ([]domain.Transaction, error)
-	Store(transactionCode, currency, emisor, receiver, transactionDate string, amount float64) (domain.Transaction, error)
+	Store(lastId int, transactionCode, currency, emisor, receiver, transactionDate string, amount float64) (domain.Transaction, error)
 	Update(idToUpdate int, transactionCode, currency, emisor, receiver, transactionDate string, amount float64) (domain.Transaction, error)
 	PatchCode(idToPatch int, transactionCode string) (domain.Transaction, error)
 	PatchAmount(idToPatch int, amount float64) (domain.Transaction, error)
 	Delete(idToDelete int) (domain.Transaction, error)
+	LastId() (int, error)
 }
 
 type repository struct {
 	db store.Store
 }
-
-var ts []domain.Transaction
 
 func NewRepository(db store.Store) Repository {
 	return &repository{
@@ -30,28 +31,27 @@ func NewRepository(db store.Store) Repository {
 
 // Get all Transactions
 func (r *repository) GetAll() ([]domain.Transaction, error) {
-	var tctions []domain.Transaction
-	if err := r.db.Read(&tctions); err != nil {
-		return nil, fmt.Errorf("cant read the databse")
+	var transactions []domain.Transaction
+	if err := r.db.Read(&transactions); err != nil {
+		return nil, errors.New(web.ReadFile)
 	}
-	return tctions, nil
+	return transactions, nil
 }
 
 // Create a new Transaction
-func (r *repository) Store(transactionCode, currency, emisor, receiver, transactionDate string, amount float64) (domain.Transaction, error) {
-	var tctions []domain.Transaction
-	// Get the tctions from the .json
-	if err := r.db.Read(&tctions); err != nil {
-		return domain.Transaction{}, fmt.Errorf("cant read the databse")
+func (r *repository) Store(lastId int, transactionCode, currency, emisor, receiver, transactionDate string, amount float64) (domain.Transaction, error) {
+	var transactions []domain.Transaction
+	// Get the transactions from the .json
+	if err := r.db.Read(&transactions); err != nil {
+		return domain.Transaction{}, errors.New(web.ReadFile)
 	}
-	for _, tction := range tctions {
+	for _, tction := range transactions {
 		if transactionCode == tction.TransactionCode {
-			return domain.Transaction{}, fmt.Errorf("the transaction already exists")
+			return domain.Transaction{}, fmt.Errorf("the transaction already existransactions")
 		}
 	}
-	lastId := tctions[len(tctions)-1].Id + 1
 	// Create the new tction
-	newTs := domain.Transaction{
+	newtransactions := domain.Transaction{
 		Id:              lastId,
 		TransactionCode: transactionCode,
 		Currency:        currency,
@@ -61,14 +61,20 @@ func (r *repository) Store(transactionCode, currency, emisor, receiver, transact
 		Amount:          amount,
 	}
 	// Push into the .json
-	tctions = append(tctions, newTs)
-	r.db.Write(tctions)
-	return newTs, nil
+	transactions = append(transactions, newtransactions)
+	r.db.Write(transactions)
+	return newtransactions, nil
 }
 
 // Update whole Transaction
 func (r *repository) Update(idToUpdate int, transactionCode, currency, emisor, receiver, transactionDate string, amount float64) (domain.Transaction, error) {
-	tsUpdated := domain.Transaction{
+	// Get the transaction from the .json
+	var transactions []domain.Transaction
+	if err := r.db.Read(&transactions); err != nil {
+		return domain.Transaction{}, errors.New(web.ReadFile)
+	}
+	// Create a transaction
+	transactionUpdated := domain.Transaction{
 		TransactionCode: transactionCode,
 		Currency:        currency,
 		Emisor:          emisor,
@@ -76,63 +82,100 @@ func (r *repository) Update(idToUpdate int, transactionCode, currency, emisor, r
 		TransactionDate: transactionDate,
 		Amount:          amount,
 	}
+	// Update transaction into the []transactions
 	exist := false
-	for i := range ts {
-		if ts[i].Id == idToUpdate {
-			tsUpdated.Id = idToUpdate
-			ts[i] = tsUpdated
+	for i := range transactions {
+		if transactions[i].Id == idToUpdate {
+			transactionUpdated.Id = idToUpdate
+			transactions[i] = transactionUpdated
 			exist = true
 		}
 	}
 	if !exist {
 		return domain.Transaction{}, fmt.Errorf("the transaction with the id %d has not been found", idToUpdate)
 	}
-	return tsUpdated, nil
+	// Push into the .json
+	r.db.Write(transactions)
+	return transactionUpdated, nil
 }
 
 // Patch Transaction Code
 func (r *repository) PatchCode(idToPatch int, transactionCode string) (domain.Transaction, error) {
+	// Get the transaction from the .json
+	var transactions []domain.Transaction
+	if err := r.db.Read(&transactions); err != nil {
+		return domain.Transaction{}, errors.New(web.ReadFile)
+	}
+	// Update the transaction
 	exist := false
-	for i := range ts {
-		if ts[i].Id == idToPatch {
-			ts[i].TransactionCode = transactionCode
+	for i := range transactions {
+		if transactions[i].Id == idToPatch {
+			transactions[i].TransactionCode = transactionCode
 			exist = true
 		}
 	}
 	if !exist {
 		return domain.Transaction{}, fmt.Errorf("the transaction with the id %d has not been found", idToPatch)
 	}
-	return ts[idToPatch], nil
+	// Push into the .json
+	r.db.Write(transactions)
+	return transactions[idToPatch], nil
 }
 
 // Patch Amount
 func (r *repository) PatchAmount(idToPatch int, amount float64) (domain.Transaction, error) {
+	// Get the transaction from the .json
+	var transactions []domain.Transaction
+	if err := r.db.Read(&transactions); err != nil {
+		return domain.Transaction{}, errors.New(web.ReadFile)
+	}
+	// Update the transaction
 	exist := false
-	for i := range ts {
-		if ts[i].Id == idToPatch {
-			ts[i].Amount = amount
+	for i := range transactions {
+		if transactions[i].Id == idToPatch {
+			transactions[i].Amount = amount
 			exist = true
 		}
 	}
 	if !exist {
 		return domain.Transaction{}, fmt.Errorf("the transaction with the id %d has not been found", idToPatch)
 	}
-	return ts[idToPatch], nil
+	// Push into the .json
+	r.db.Write(transactions)
+	return transactions[idToPatch], nil
 }
 
-// Delete the transaction with the id specified
+// Delete the transaction with the id specificed
 func (r *repository) Delete(idToDelete int) (domain.Transaction, error) {
+	// Get the transaction from the .json
+	var transactions []domain.Transaction
+	if err := r.db.Read(&transactions); err != nil {
+		return domain.Transaction{}, errors.New(web.ReadFile)
+	}
+	// Delete transaction
 	var transactionDeleted domain.Transaction
 	exist := false
-	for i := range ts {
-		if ts[i].Id == idToDelete {
-			transactionDeleted = ts[i]
-			ts = append(ts[:idToDelete], ts[idToDelete+1:]...)
+	for i := range transactions {
+		if transactions[i].Id == idToDelete {
+			transactionDeleted = transactions[i]
+			transactions = append(transactions[:idToDelete], transactions[idToDelete+1:]...)
 			exist = true
 		}
 	}
 	if !exist {
 		return domain.Transaction{}, fmt.Errorf("the id %d doesn't exist", idToDelete)
 	}
+	// Push into the .json
+	r.db.Write(transactions)
 	return transactionDeleted, nil
+}
+
+// Get the last id
+func (r *repository) LastId() (int, error) {
+	var transactions []domain.Transaction
+	if err := r.db.Read(&transactions); err != nil {
+		return 0, errors.New(web.ReadFile)
+	}
+	lastId := transactions[len(transactions)-1].Id + 1
+	return lastId, nil
 }

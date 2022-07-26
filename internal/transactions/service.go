@@ -29,7 +29,9 @@ func (s *service) GetAll() ([]domain.Transaction, error) {
 }
 
 func (s *service) Store(transactionCode, currency, emisor, receiver, transactionDate string, amount float64) (domain.Transaction, error) {
+	lastId, _ := s.repository.LastId()
 	newTs, err := s.repository.Store(
+		lastId,
 		transactionCode,
 		currency,
 		emisor,
@@ -40,7 +42,6 @@ func (s *service) Store(transactionCode, currency, emisor, receiver, transaction
 	if err != nil {
 		return domain.Transaction{}, err
 	}
-	ts = append(ts, newTs)
 	return newTs, nil
 }
 func (s *service) Update(idToUpdate int, transactionCode, currency, emisor, receiver, transactionDate string, amount float64) (domain.Transaction, error) {

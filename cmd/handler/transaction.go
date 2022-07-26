@@ -9,12 +9,11 @@ import (
 )
 
 type request struct {
-	Id              int     `json:"id"`
-	TransactionCode string  `json:"transactioncode"`
+	TransactionCode string  `json:"transaction_code"`
 	Currency        string  `json:"currency"`
 	Emisor          string  `json:"emisor"`
 	Receiver        string  `json:"receiver"`
-	TransactionDate string  `json:"transactiondate"`
+	TransactionDate string  `json:"transaction_date"`
 	Amount          float64 `json:"amount"`
 }
 
@@ -71,6 +70,30 @@ func (s *Transaction) Store() gin.HandlerFunc {
 			})
 			return
 		}
+		if req.TransactionCode == "" {
+			ctx.JSON(400, gin.H{"error": "The transaction code is requerid"})
+			return
+		}
+		if req.Currency == "" {
+			ctx.JSON(400, gin.H{"error": "The currency is requerid"})
+			return
+		}
+		if req.Emisor == "" {
+			ctx.JSON(400, gin.H{"error": "The emisor is requerid"})
+			return
+		}
+		if req.Receiver == "" {
+			ctx.JSON(400, gin.H{"error": "The receiver is requerid"})
+			return
+		}
+		if req.TransactionDate == "" {
+			ctx.JSON(400, gin.H{"error": "The transaction date is requerid"})
+			return
+		}
+		if req.Amount < 0 {
+			ctx.JSON(400, gin.H{"error": "The amount cannt be empty"})
+			return
+		}
 		t, err := s.service.Store(req.TransactionCode, req.Currency, req.Emisor, req.Receiver, req.TransactionDate, req.Amount)
 		if err != nil {
 			ctx.JSON(404, gin.H{"error": err.Error()})
@@ -122,7 +145,7 @@ func (s *Transaction) Update() gin.HandlerFunc {
 			ctx.JSON(400, gin.H{"msg": err.Error()})
 			return
 		}
-		ctx.JSON(204, ts)
+		ctx.JSON(200, ts)
 	}
 }
 
@@ -147,7 +170,7 @@ func (s *Transaction) PatchCode() gin.HandlerFunc {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
-		ctx.JSON(204, ts)
+		ctx.JSON(200, ts)
 	}
 }
 
@@ -172,7 +195,7 @@ func (s *Transaction) PatchAmount() gin.HandlerFunc {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
-		ctx.JSON(204, ts)
+		ctx.JSON(200, ts)
 	}
 }
 

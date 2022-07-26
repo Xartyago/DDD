@@ -46,10 +46,10 @@ func main() {
 	pr := r.Group("/transactions")
 	pr.POST("/", ts.Store())
 	pr.GET("/", ts.GetAll())
-	pr.PUT("/", ts.Update())
+	pr.PUT("/:id", ts.Update())
 	pr.PATCH("/code/:id", ts.PatchCode())
 	pr.PATCH("/amount/:id", ts.PatchAmount())
-	pr.DELETE("/", ts.Delete())
+	pr.DELETE("/:id", ts.Delete())
 	r.Run(":8080")
 }
 
