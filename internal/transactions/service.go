@@ -4,6 +4,7 @@ import "github.com/Xartyago/DDD/internal/domain"
 
 type Service interface {
 	GetAll() ([]domain.Transaction, error)
+	Get(idToFind int) (domain.Transaction, error)
 	Store(transactionCode, currency, emisor, receiver, transactionDate string, amount float64) (domain.Transaction, error)
 	Update(idToUpdate int, transactionCode, currency, emisor, receiver, transactionDate string, amount float64) (domain.Transaction, error)
 	PatchCode(idToPatch int, transactionCode string) (domain.Transaction, error)
@@ -28,10 +29,16 @@ func (s *service) GetAll() ([]domain.Transaction, error) {
 	return ts, nil
 }
 
+func (s *service) Get(idToFind int) (domain.Transaction, error) {
+	ts, err := s.repository.Get(idToFind)
+	if err != nil {
+		return domain.Transaction{}, nil
+	}
+	return ts, nil
+}
+
 func (s *service) Store(transactionCode, currency, emisor, receiver, transactionDate string, amount float64) (domain.Transaction, error) {
-	lastId, _ := s.repository.LastId()
 	newTs, err := s.repository.Store(
-		lastId,
 		transactionCode,
 		currency,
 		emisor,
@@ -44,16 +51,39 @@ func (s *service) Store(transactionCode, currency, emisor, receiver, transaction
 	}
 	return newTs, nil
 }
+
 func (s *service) Update(idToUpdate int, transactionCode, currency, emisor, receiver, transactionDate string, amount float64) (domain.Transaction, error) {
-	return s.repository.Update(idToUpdate, transactionCode, currency, emisor, receiver, transactionDate, amount)
+	tsUpdated, err := s.repository.Update(idToUpdate, transactionCode, currency, emisor, receiver, transactionDate, amount)
+	if err != nil {
+		return domain.Transaction{}, err
+	}
+	return tsUpdated, nil
 }
 
 func (s *service) PatchCode(idToPatch int, transactionCode string) (domain.Transaction, error) {
-	return s.repository.PatchCode(idToPatch, transactionCode)
+	_, err := s.repository.PatchCode(idToPatch, transactionCode)
+	if err != nil {
+		return domain.Transaction{}, nil
+	}
+	ts, err := s.repository.Get(idToPatch)
+	if err != nil {
+		return domain.Transaction{}, nil
+	}
+	return ts, nil
 }
+
 func (s *service) PatchAmount(idToPatch int, amount float64) (domain.Transaction, error) {
-	return s.repository.PatchAmount(idToPatch, amount)
+	_, err := s.repository.PatchAmount(idToPatch, amount)
+	if err != nil {
+		return domain.Transaction{}, nil
+	}
+	ts, err := s.repository.Get(idToPatch)
+	if err != nil {
+		return domain.Transaction{}, nil
+	}
+	return ts, nil
 }
+
 func (s *service) Delete(idToDelete int) (domain.Transaction, error) {
 	return s.repository.Delete(idToDelete)
 }

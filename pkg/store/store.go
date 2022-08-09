@@ -10,24 +10,24 @@ type Store interface {
 	Write(data interface{}) error
 }
 
-type fileStore struct {
+type FileStore struct {
 	FilePath string
 }
 
 func NewStore(fileName string) Store {
-	return &fileStore{
+	return &FileStore{
 		FilePath: fileName,
 	}
 }
 
-func (fs *fileStore) Write(data interface{}) error {
+func (fs *FileStore) Write(data interface{}) error {
 	fileData, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
 	return os.WriteFile(fs.FilePath, fileData, 0644)
 }
-func (fs *fileStore) Read(data interface{}) error {
+func (fs *FileStore) Read(data interface{}) error {
 	file, err := os.ReadFile(fs.FilePath)
 	if err != nil {
 		return err

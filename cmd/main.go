@@ -5,11 +5,10 @@ import (
 	"os"
 
 	"github.com/Xartyago/DDD/cmd/handler"
+	"github.com/Xartyago/DDD/db"
 	"github.com/Xartyago/DDD/docs"
 	"github.com/Xartyago/DDD/internal/transactions"
-	"github.com/Xartyago/DDD/pkg/store"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -26,13 +25,10 @@ import (
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
 func main() {
-	// Get the enviroment vars
-	err := godotenv.Load("../.env")
+	db, err := db.NewConnection()
 	if err != nil {
-		log.Fatal("error in load .env file")
+		log.Fatal("Error in the connection")
 	}
-	//Initialize the whole server
-	db := store.NewStore("../transactions.json")
 	repository := transactions.NewRepository(db)
 	service := transactions.NewService(repository)
 	ts := handler.NewTransaction(service)
@@ -44,8 +40,10 @@ func main() {
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	pr := r.Group("/transactions")
+	pr.Use(TokenAuthMiddleware())
 	pr.POST("/", ts.Store())
 	pr.GET("/", ts.GetAll())
+	pr.GET("/:id", ts.Get())
 	pr.PUT("/:id", ts.Update())
 	pr.PATCH("/code/:id", ts.PatchCode())
 	pr.PATCH("/amount/:id", ts.PatchAmount())
@@ -62,9 +60,11 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		token := ctx.GetHeader("token")
 		if token == "" {
 			ctx.AbortWithStatusJSON(401, gin.H{"msg": "Token in headers not found"})
+			return
 		}
 		if token != envToken {
 			ctx.AbortWithStatusJSON(401, gin.H{"msg": "the token is not valid"})
+			return
 		}
 	}
 }

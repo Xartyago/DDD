@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"os"
 	"strconv"
 
 	"github.com/Xartyago/DDD/internal/transactions"
@@ -38,14 +37,20 @@ func NewTransaction(s transactions.Service) *Transaction {
 // @Router /transactions [get]
 func (s *Transaction) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token := ctx.Request.Header.Get("token")
-		if token != os.Getenv("TOKEN") {
-			ctx.JSON(401, gin.H{
-				"error": "token inválido",
+		t, err := s.service.GetAll()
+		if err != nil {
+			ctx.JSON(404, gin.H{
+				"error": err.Error(),
 			})
 			return
 		}
-		t, err := s.service.GetAll()
+		ctx.JSON(200, t)
+	}
+}
+func (s *Transaction) Get() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		idToFind, _ := strconv.Atoi(ctx.Param("id"))
+		t, err := s.service.Get(idToFind)
 		if err != nil {
 			ctx.JSON(404, gin.H{
 				"error": err.Error(),
@@ -58,11 +63,6 @@ func (s *Transaction) GetAll() gin.HandlerFunc {
 
 func (s *Transaction) Store() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token := ctx.Request.Header.Get("token")
-		if token != "123456" {
-			ctx.JSON(400, gin.H{"error": "Invalid Token"})
-			return
-		}
 		var req request
 		if err := ctx.Bind(&req); err != nil {
 			ctx.JSON(404, gin.H{
@@ -106,12 +106,7 @@ func (s *Transaction) Store() gin.HandlerFunc {
 func (s *Transaction) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req request
-		token := ctx.Request.Header.Get("token")
 		idToUpdate, _ := strconv.Atoi(ctx.Param("id"))
-		if token != "123456" {
-			ctx.JSON(400, gin.H{"error": "Invalid Token"})
-			return
-		}
 		if err := ctx.ShouldBindJSON(&req); err != nil {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
@@ -152,12 +147,7 @@ func (s *Transaction) Update() gin.HandlerFunc {
 func (s *Transaction) PatchCode() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req request
-		token := ctx.Request.Header.Get("token")
 		idToPatch, _ := strconv.Atoi(ctx.Param("id"))
-		if token != "123456" {
-			ctx.JSON(400, gin.H{"msg": "Invalid Token"})
-			return
-		}
 		if err := ctx.ShouldBindJSON(&req); err != nil {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
@@ -177,12 +167,7 @@ func (s *Transaction) PatchCode() gin.HandlerFunc {
 func (s *Transaction) PatchAmount() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req request
-		token := ctx.Request.Header.Get("token")
 		idToPatch, _ := strconv.Atoi(ctx.Param("id"))
-		if token != "123456" {
-			ctx.JSON(400, gin.H{"msg": "Invalid Token"})
-			return
-		}
 		if err := ctx.ShouldBindJSON(&req); err != nil {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
@@ -201,12 +186,7 @@ func (s *Transaction) PatchAmount() gin.HandlerFunc {
 
 func (s *Transaction) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token := ctx.Request.Header.Get("token")
 		idToDelete, _ := strconv.Atoi(ctx.Param("id"))
-		if token != "123456" {
-			ctx.JSON(400, gin.H{"msg": "Invalid Token"})
-			return
-		}
 		ts, err := s.service.Delete(idToDelete)
 		if err != nil {
 			ctx.JSON(400, gin.H{"error": err.Error()})
